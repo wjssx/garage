@@ -3,6 +3,8 @@
 import argparse
 
 import joblib
+import tensorflow as tf
+
 from garage.misc.console import query_yes_no
 from garage.sampler.utils import rollout
 
@@ -22,16 +24,15 @@ if __name__ == '__main__':
     # import tensorflow as tf
     # with tf.compat.v1.Session():
     #     [rest of the code]
-    with tf.compat.v1.Session() as sess:
-        data = joblib.load(args.file)
-        policy = data['algo'].policy
-        env = data['env']
-        while True:
-            path = rollout(
-                env,
-                policy,
-                max_path_length=args.max_path_length,
-                animated=True,
-                speedup=args.speedup)
-            if not query_yes_no('Continue simulation?'):
-                break
+    data = joblib.load(args.file)
+    policy = data['algo'].policy
+    env = data['env']
+    while True:
+        path = rollout(
+            env,
+            policy,
+            max_path_length=args.max_path_length,
+            animated=True,
+            speedup=args.speedup)
+        if not query_yes_no('Continue simulation?'):
+            break

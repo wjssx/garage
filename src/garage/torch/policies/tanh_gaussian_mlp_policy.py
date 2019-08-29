@@ -1,11 +1,11 @@
-"""GaussianMLPPolicy."""
+"""TanhGaussianMLPPolicy."""
 import torch
 
-from garage.torch.modules import GaussianMLPModule
+from garage.torch.modules import TanhGaussianMLPTwoHeadedModule
 from garage.torch.policies import Policy
 
 
-class GaussianMLPPolicy(Policy, GaussianMLPModule):
+class TanhGaussianMLPPolicy(Policy, TanhGaussianMLPTwoHeadedModule):
     """
     GaussianMLPPolicy.
 
@@ -24,7 +24,7 @@ class GaussianMLPPolicy(Policy, GaussianMLPModule):
         self._action_dim = env_spec.action_space.flat_dim
 
         Policy.__init__(self, env_spec)
-        GaussianMLPModule.__init__(self,
+        TanhGaussianMLPTwoHeadedModule.__init__(self,
                                    input_dim=self._obs_dim,
                                    output_dim=self._action_dim,
                                    **kwargs)
