@@ -17,6 +17,7 @@ from tests.fixtures import snapshot_config, TfGraphTestCase
 class TestPPOWithModel(TfGraphTestCase):
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_ppo_pendulum_gru_with_model(self):
         """Test PPO with Pendulum environment and GRU policy."""
         with LocalTFRunner(snapshot_config, sess=self.sess) as runner:

@@ -56,6 +56,7 @@ class TestPPO(TfGraphTestCase):
             env.close()
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_ppo_pendulum_recurrent_continuous_baseline(self):
         """Test PPO with Pendulum environment and recurrent policy."""
         with LocalTFRunner(snapshot_config) as runner:

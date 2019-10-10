@@ -32,6 +32,7 @@ class TestTRPO(TfGraphTestCase):
         )
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_trpo_pendulum(self):
         """Test TRPO with Pendulum environment."""
         with LocalTFRunner(snapshot_config, sess=self.sess) as runner:
@@ -46,6 +47,7 @@ class TestTRPO(TfGraphTestCase):
             last_avg_ret = runner.train(n_epochs=10, batch_size=2048)
             assert last_avg_ret > 50
 
+    @pytest.mark.mujoco
     def test_trpo_unknown_kl_constraint(self):
         """Test TRPO with unkown KL constraints."""
         with pytest.raises(ValueError, match='Invalid kl_constraint'):
@@ -61,6 +63,7 @@ class TestTRPO(TfGraphTestCase):
             )
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_trpo_soft_kl_constraint(self):
         """Test TRPO with unkown KL constraints."""
         with LocalTFRunner(snapshot_config, sess=self.sess) as runner:

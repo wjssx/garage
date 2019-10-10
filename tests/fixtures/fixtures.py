@@ -30,7 +30,27 @@ class TfTestCase:
 class TfGraphTestCase:
 
     def setup_method(self):
-        tf.reset_default_graph()
+        # session = tf.get_default_session()
+        # if session is not None:
+        #     if session._closed is True:
+        #         tf.reset_default_graph()
+        #     else:
+        #         logger.remove_all()
+        #         session.__exit__(None, None, None)
+        #         session.sess_manager.__exit__(None, None, None)
+        #         self.graph_manager.__exit__(None, None, None)
+        #         self.sess.close()
+        #
+        #         # These del are crucial to prevent ENOMEM in the CI
+        #         # b/c TensorFlow does not release memory explicitly
+        #         del self.graph
+        #         del self.sess
+        #         gc.collect()
+
+        try:
+            tf.reset_default_graph()
+        except AssertionError:
+            pass
         self.graph = tf.Graph()
         for c in self.graph.collections:
             self.graph.clear_collection(c)

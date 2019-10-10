@@ -18,6 +18,7 @@ from tests.fixtures import snapshot_config, TfGraphTestCase
 class TestPPOWithModel(TfGraphTestCase):
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_ppo_pendulum_lstm_with_model(self):
         """Test PPO with model, with Pendulum environment."""
         with LocalTFRunner(snapshot_config, sess=self.sess) as runner:
@@ -51,6 +52,7 @@ class TestPPOWithModel(TfGraphTestCase):
             env.close()
 
     @pytest.mark.large
+    @pytest.mark.mujoco
     def test_ppo_pendulum_gru_with_model(self):
         """Test PPO with model, with Pendulum environment."""
         with LocalTFRunner(snapshot_config, sess=self.sess) as runner:
