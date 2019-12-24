@@ -105,7 +105,6 @@ class TrajectoryBatch(
                                                     observations.shape[0]))
 
         # actions
-        # TODO: Shape check can be removed for gym>=0.15.4 # pylint: disable=fixme # noqa: E501
         if not (env_spec.action_space.contains(first_action)
                 and first_action.shape == env_spec.action_space.shape):
             raise ValueError(
@@ -167,3 +166,91 @@ class TrajectoryBatch(
         return super().__new__(TrajectoryBatch, env_spec, observations,
                                actions, rewards, terminals, env_infos,
                                agent_infos, lengths)
+
+
+class TimeStep(
+        collections.namedtuple('TimeStep', [
+            'env_spec',
+            'observation',
+            'action',
+            'reward',
+            'next_observation',
+            'terminal',
+            'env_info',
+            'agent_info',
+        ])):
+    # pylint: disable=missing-return-doc, missing-return-type-doc, missing-param-doc, missing-type-doc  # noqa: E501
+    r"""A tuple representing a single sample.
+
+    A :class:`Sample` represents a single sample when an agent interacts with
+        an environment.
+
+    Attributes:
+        env_spec (garage.envs.EnvSpec): Specification for the environment from
+            which this data was sampled.
+        observation (numpy.ndarray): A numpy array of shape
+            :math:`(O^*)` containing the observation for the current time step
+            in the environment. These must conform to
+            :obj:`env_spec.observation_space`.
+        actions (numpy.ndarray): A numpy array of shape
+            :math:`(A^*)` containing the action for the current time step.
+            These must conform to :obj:`env_spec.action_space`.
+        reward (float): A float representing the reward for taking
+            the action given the observation, at the current time step.
+        terminals (bool): The termination signal for the current time step.
+        env_info (dict): A dict arbitrary environment state
+            information.
+        agent_info (numpy.ndarray): A dict of arbitrary agent
+            state information. For example, this may contain the hidden states
+            from an RNN policy.
+
+
+    Raises:
+        ValueError: If any of the above attributes do not conform to their
+            prescribed types and shapes.
+
+    """
+
+    def __new__(cls, env_spec, observation, action, reward, next_observation,
+                terminal, env_info, agent_info):  # noqa: D102
+
+        # observations
+        if not env_spec.observation_space.contains(observation):
+            raise ValueError(
+                'observations must conform to observation_space {}, but got '
+                'data with shape {} instead.'.format(
+                    env_spec.observation_space, observation))
+
+        if not env_spec.observation_space.contains(next_observation):
+            raise ValueError(
+                'next_observation must conform to observation_space {},'
+                ' but got data with shape {} instead.'.format(
+                    env_spec.observation_space, next_observation))
+
+        # action
+        if not env_spec.action_space.contains(action):
+            raise ValueError(
+                'action must conform to action_space {}, but got data with '
+                'shape {} instead.'.format(env_spec.action_space, action))
+
+        if not isinstance(agent_info, dict):
+            raise ValueError('agent_info must be type {}, but got type {} '
+                             'instead.'.format(dict, type(agent_info)))
+
+        if not isinstance(env_info, dict):
+            raise ValueError('env_info must be type {}, but got type {} '
+                             'instead.'.format(dict, type(env_info)))
+
+        # rewards
+        if not isinstance(reward, float):
+            raise ValueError('Rewards must be type {}, but got type {} '
+                             'instead.'.format(float, type(reward)))
+
+        if not isinstance(terminal, bool):
+            raise ValueError(
+                'Terminal must be dtype bool, but got dtype {} instead.'.
+                format(type(terminal)))
+
+        return super().__new__(TimeStep, env_spec, observation, action, reward,
+                               next_observation, terminal, env_info,
+                               agent_info)
