@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import numpy as np
 
+from garage import TrajectoryBatch
 from garage.experiment import deterministic
 
 
@@ -52,20 +53,8 @@ class Worker(abc.ABC):
         """Sample a single rollout of the agent in the environment.
 
         Returns:
-            observations(np.array): Non-flattened array of observations. There
-                should be one more of these than actions. Note that
-                observations[i] (for i < len(observations) - 1) was used by the
-                agent to choose actions[i]. Should have shape (T + 1, S^*) (the
-                unflattened state space of the current environment).
-            actions(np.array): Non-flattened array of actions. Should have
-                shape (T, S^*) (the unflattened action space of the current
-                environment).
-            rewards(np.array): Array of rewards of shape (T,) (1D array of
-                length timesteps).
-            agent_infos(Dict[str, np.array]): Dictionary of stacked,
-                non-flattened `agent_info` arrays.
-            env_infos(Dict[str, np.array]): Dictionary of stacked,
-                non-flattened `env_info` arrays.
+            garage.TrajectoryBatch: Batch of sampled trajectories. May be
+                truncated if max_path_length is set.
 
         """
 
@@ -85,20 +74,8 @@ class Worker(abc.ABC):
         """Collect the current rollout, clearing the internal buffer.
 
         Returns:
-            observations(np.array): Non-flattened array of observations. There
-                should be one more of these than actions. Note that
-                observations[i] (for i < len(observations) - 1) was used by the
-                agent to choose actions[i]. Should have shape (T + 1, S^*) (the
-                unflattened state space of the current environment).
-            actions(np.array): Non-flattened array of actions. Should have
-                shape (T, S^*) (the unflattened action space of the current
-                environment).
-            rewards(np.array): Array of rewards of shape (T,) (1D array of
-                length timesteps).
-            agent_infos(Dict[str, np.array]): Dictionary of stacked,
-                non-flattened `agent_info` arrays.
-            env_infos(Dict[str, np.array]): Dictionary of stacked,
-                non-flattened `env_info` arrays.
+            garage.TrajectoryBatch: Batch of sampled trajectories. May be
+                truncated if the rollouts haven't completed yet.
 
         """
 
@@ -144,6 +121,8 @@ class DefaultWorker(Worker):
         self._observations = []
         self._actions = []
         self._rewards = []
+        self._terminals = []
+        self._lengths = []
         self._agent_infos = defaultdict(list)
         self._env_infos = defaultdict(list)
         self._last_obs = None
@@ -190,6 +169,8 @@ class DefaultWorker(Worker):
         self._observations = []
         self._actions = []
         self._rewards = []
+        self._terminals = []
+        self._lengths = []
         self._agent_infos = defaultdict(list)
         self._env_infos = defaultdict(list)
         self._path_length = 0
@@ -215,7 +196,9 @@ class DefaultWorker(Worker):
             for k, v in env_info.items():
                 self._env_infos[k].append(v)
             self._path_length += 1
+            self._terminals.append(d)
             if d:
+                self._lengths.append(self._path_length)
                 return True
             self._last_obs = next_o
             return False
@@ -249,16 +232,23 @@ class DefaultWorker(Worker):
         self._actions = []
         rewards = self._rewards
         self._rewards = []
-        agent_infos = self._agent_infos
-        self._agent_infos = defaultdict(list)
+        terminals = self._terminals
+        self._terminals = []
         env_infos = self._env_infos
         self._env_infos = defaultdict(list)
+        agent_infos = self._agent_infos
+        self._agent_infos = defaultdict(list)
         for k, v in agent_infos.items():
             agent_infos[k] = np.asarray(v)
         for k, v in env_infos.items():
             env_infos[k] = np.asarray(v)
-        return (np.array(observations), np.array(actions), np.array(rewards),
-                dict(agent_infos), dict(env_infos))
+        lengths = self._lengths
+        self._lengths = []
+        return TrajectoryBatch(self.env.spec, np.asarray(observations),
+                               np.asarray(actions), np.asarray(rewards),
+                               np.asarray(terminals), dict(env_infos),
+                               dict(agent_infos), np.asarray(lengths,
+                                                             dtype='i'))
 
     def rollout(self):
         """Sample a single rollout of the agent in the environment.
