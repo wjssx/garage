@@ -1,6 +1,7 @@
 """Samplers which run agents in environments."""
 
 from garage.sampler.batch_sampler import BatchSampler
+from garage.sampler.in_place_sampler import InPlaceSampler
 from garage.sampler.is_sampler import ISSampler
 from garage.sampler.off_policy_vectorized_sampler import (
     OffPolicyVectorizedSampler)
@@ -15,8 +16,18 @@ from garage.sampler.worker import DefaultWorker, Worker
 from garage.sampler.worker_factory import WorkerFactory
 
 __all__ = [
-    'BatchSampler', 'Sampler', 'ISSampler', 'singleton_pool', 'RaySampler',
-    'SamplerWorker', 'ParallelVecEnvExecutor', 'VecEnvExecutor',
-    'OffPolicyVectorizedSampler', 'OnPolicyVectorizedSampler', 'WorkerFactory',
-    'Worker', 'DefaultWorker'
+    'BatchSampler',
+    'Sampler',
+    'ISSampler',
+    'singleton_pool',
+    'RaySampler',
+    'SamplerWorker',
+    'ParallelVecEnvExecutor',
+    'VecEnvExecutor',
+    'OffPolicyVectorizedSampler',
+    'OnPolicyVectorizedSampler',
+    'WorkerFactory',
+    'Worker',
+    'DefaultWorker',
+    'InPlaceSampler',
 ]
