@@ -148,7 +148,10 @@ class GarageEnv(gym.Wrapper):
                 debugging, and sometimes learning)
 
         """
-        return self.env.step(action)
+        observation, reward, done, info = self.env.step(action)
+        if 'TimeLimit.truncated' in info:
+                done = not info['TimeLimit.truncated']
+        return observation, reward, done, info
 
     def __getstate__(self):
         """See `Object.__getstate__.
